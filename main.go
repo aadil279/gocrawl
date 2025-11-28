@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func main() {
+func CrawlSite(url string) {
 	resp, err := http.Get("https://www.webscraper.io")
 
 	if err != nil {
@@ -17,4 +17,8 @@ func main() {
 	rb, err := io.ReadAll(resp.Body)
 
 	fmt.Println(string(rb))
+}
+
+func main() {
+
 }
