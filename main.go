@@ -36,30 +36,50 @@ func CrawlSite(url string) {
 	}
 	defer resp.Body.Close()
 
-	aTags(resp.Body)
+	tagList, _ := aTags(resp.Body)
+
+	fmt.Println(tagList)
 }
 
-func aTags(body io.ReadCloser) {
+func aTags(body io.ReadCloser) ([]*html.Node, error) {
 	doc, err := html.Parse(body)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// List of scraped <a> tags
+	var aTagList []*html.Node = []*html.Node{}
+
+	// Loop through all the nodes in the document
 	for n := range doc.Descendants() {
+
+		// Check if the node is an <a> tag
 		if n.Type == html.ElementNode && n.DataAtom == atom.A {
+			// Append tag to list
+			aTagList = append(aTagList, n)
+
+			// Loop through the attributes of the <a> tag
 			for _, a := range n.Attr {
+
+				// Get the href attribute of the <a> tag
 				if a.Key == "href" {
 					val := a.Val
 					protocol := strings.Split(val, `:`)[0]
 
 					if protocolAllowed(protocol) {
-						fmt.Println(string(a.Val))
+						handleScrapedLink(string(a.Val))
 					}
 				}
 			}
 		}
 	}
+
+	return aTagList, nil
+}
+
+func handleScrapedLink(link string) {
+	fmt.Println(link)
 }
 
 func protocolAllowed(proto string) bool {
